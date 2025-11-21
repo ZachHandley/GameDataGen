@@ -8,6 +8,8 @@
     "build": "tsc",
     "dev": "tsx watch",
     "example": "tsx examples/complete-example.ts",
+    "example:simple": "tsx examples/simple-example.ts",
+    "example:advanced": "tsx examples/advanced-world-generation.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

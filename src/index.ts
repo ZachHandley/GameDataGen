@@ -11,9 +11,13 @@ export * from './core/SchemaRegistry.js';
 export * from './core/ContextManager.js';
 export * from './core/GenerationEngine.js';
 export * from './core/EditingSystem.js';
+export * from './core/KnowledgeGraph.js';
+export * from './core/LevelingSystem.js';
+export * from './core/SpatialSystem.js';
 
 // Connector exports
 export * from './connectors/RelationshipDefinitions.js';
 
 // Example schemas (optional)
 export * as MMORPGSchemas from './schemas/examples/mmorpg-schemas.js';
+export * as EnhancedMMORPGSchemas from './schemas/examples/enhanced-mmorpg-schemas.js';
