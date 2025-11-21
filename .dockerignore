@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Node/TypeScript (old)
+node_modules/
+dist/
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project data
+assets/
+exports/
+output/
+.gamedatagen/
+
+# Tests
+tests/
+*.test.py
+
+# Documentation
+docs/
+examples/
+*.md
