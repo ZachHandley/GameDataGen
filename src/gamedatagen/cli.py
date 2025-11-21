@@ -285,13 +285,17 @@ def serve(host: str, port: int, reload: bool) -> None:
 
 
 @main.command()
-@click.argument("format", type=click.Choice(["unity", "unreal", "godot", "json"]))
+@click.argument(
+    "format", type=click.Choice(["bevy", "rust", "bevy-json", "unity", "unreal", "godot", "json"])
+)
 @click.option("--output", "-o", help="Output directory")
 def export(format: str, output: Optional[str]) -> None:
     """
     Export game content for various game engines
 
     Examples:
+        gamedatagen export bevy --output ./bevy-assets  # RON format for Bevy/Rust
+        gamedatagen export bevy-json                     # JSON format for Bevy
         gamedatagen export unity --output ./unity-assets
         gamedatagen export json --output ./export
     """

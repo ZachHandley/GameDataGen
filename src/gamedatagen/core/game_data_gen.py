@@ -302,11 +302,24 @@ class GameDataGen:
 
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # TODO: Implement format-specific exporters
-        # For now, just copy JSON files
+        # Import exporters
+        from gamedatagen.exporters.bevy import BevyExporter
+        from gamedatagen.exporters.json_exporter import JSONExporter
 
-        if format == "json":
+        if format == "bevy" or format == "rust":
+            # Bevy/Rust export (RON format)
+            exporter = BevyExporter(self.config.content_dir)
+            exporter.export(output_dir, format="ron")
+        elif format == "bevy-json":
+            # Bevy with JSON format
+            exporter = BevyExporter(self.config.content_dir)
+            exporter.export(output_dir, format="json")
+        elif format == "json":
             # Simple JSON export
+            exporter = JSONExporter(self.config.content_dir)
+            exporter.export(output_dir)
+        else:
+            # Fallback to simple JSON copy
             import shutil
 
             shutil.copytree(self.config.content_dir, output_dir / "content", dirs_exist_ok=True)
@@ -347,7 +360,7 @@ class GameDataGen:
 
     def visualize(self, graph_type: str = "all") -> Path:
         """Generate knowledge graph visualization"""
-        # TODO: Implement visualization
+        from gamedatagen.visualization import visualize_knowledge_graph
+
         output_file = self.config.project_root / "knowledge_graph.html"
-        output_file.write_text("<html><body>Knowledge Graph Visualization Coming Soon</body></html>")
-        return output_file
+        return visualize_knowledge_graph(self.knowledge_graph, output_file)

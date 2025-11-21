@@ -15,6 +15,8 @@ from pydantic import BaseModel, Field, create_model
 class SchemaDefinition(BaseModel):
     """Schema definition metadata"""
 
+    model_config = {"protected_namespaces": ()}  # Allow "schema" field
+
     name: str
     description: Optional[str] = None
     schema: Dict[str, Any]  # JSON Schema
