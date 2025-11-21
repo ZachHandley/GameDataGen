@@ -12,6 +12,7 @@
     "example:advanced": "tsx examples/advanced-world-generation.ts",
     "example:events": "tsx examples/events-and-random-content.ts",
     "example:icons": "tsx examples/icons-integration.ts",
+    "example:images": "tsx examples/image-generation.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
