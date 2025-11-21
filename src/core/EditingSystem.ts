@@ -78,6 +78,7 @@ export class EditingSystem {
         ...entity,
         data: updatedData,
         metadata: {
+          generatedAt: entity.metadata?.generatedAt || new Date(),
           ...entity.metadata,
           lastEditedAt: new Date(),
         },
