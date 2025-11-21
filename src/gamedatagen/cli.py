@@ -14,7 +14,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 from gamedatagen import __version__
-from gamedatagen.config import ProjectConfig, load_config, init_project
+from gamedatagen.config import init_project, load_config
 from gamedatagen.core.game_data_gen import GameDataGen
 
 console = Console()
@@ -266,11 +266,11 @@ def serve(host: str, port: int, reload: bool) -> None:
 
     console.print()
     console.print("[bold]API Endpoints:[/]")
-    console.print(f"  [cyan]POST[/] /generate/{{entity_type}}")
-    console.print(f"  [cyan]GET[/]  /entities/{{entity_type}}")
-    console.print(f"  [cyan]GET[/]  /entities/{{entity_type}}/{{entity_id}}")
-    console.print(f"  [cyan]PUT[/]  /entities/{{entity_type}}/{{entity_id}}")
-    console.print(f"  [cyan]GET[/]  /knowledge-graph")
+    console.print("  [cyan]POST[/] /generate/{entity_type}")
+    console.print("  [cyan]GET[/]  /entities/{entity_type}")
+    console.print("  [cyan]GET[/]  /entities/{entity_type}/{entity_id}")
+    console.print("  [cyan]PUT[/]  /entities/{entity_type}/{entity_id}")
+    console.print("  [cyan]GET[/]  /knowledge-graph")
     console.print()
     console.print(f"[dim]Documentation: http://{host}:{port}/docs[/]")
     console.print()
@@ -335,13 +335,13 @@ def status() -> None:
     console.print()
 
     # Knowledge graph stats
-    console.print(f"[bold]Knowledge Graph:[/]")
+    console.print("[bold]Knowledge Graph:[/]")
     console.print(f"  Triplets: {stats['knowledge_graph']['triplets']}")
     console.print(f"  Entities: {stats['knowledge_graph']['entities']}")
     console.print()
 
     # Storage stats
-    console.print(f"[bold]Storage:[/]")
+    console.print("[bold]Storage:[/]")
     console.print(f"  Location: {config.project_root}/assets/game_content")
     console.print(f"  Images: {stats['storage']['images']}")
     console.print(f"  Total size: {stats['storage']['total_size_mb']:.2f} MB")

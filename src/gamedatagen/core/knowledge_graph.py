@@ -151,9 +151,6 @@ class KnowledgeGraph:
     def remove_entity(self, entity: EntityReference) -> int:
         """Remove all triplets involving an entity"""
 
-        subject_key = f"{entity.type}:{entity.id}"
-        object_key = subject_key
-
         # Find all triplets
         to_remove = set()
         for triplet in self.triplets:
