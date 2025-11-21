@@ -21,6 +21,8 @@ export * from './connectors/RelationshipDefinitions.js';
 // Utilities
 export * from './utils/IconifyService.js';
 export * from './utils/ImageGenerationService.js';
+export * from './utils/PromptBuilder.js';
+export * from './utils/ImageQualityChecker.js';
 
 // Example schemas (optional)
 export * as MMORPGSchemas from './schemas/examples/mmorpg-schemas.js';

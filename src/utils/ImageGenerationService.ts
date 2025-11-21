@@ -4,6 +4,14 @@
  */
 
 import OpenAI from 'openai';
+import { PromptBuilder, ImageModel } from './PromptBuilder.js';
+import {
+  ImageQualityChecker,
+  QualityCheckOptions,
+  QualityCheckResult,
+  generateWithQualityControl,
+  GenerateWithQCOptions,
+} from './ImageQualityChecker.js';
 
 export interface ImageGenerationRequest {
   prompt: string;
@@ -32,6 +40,10 @@ export interface EntityImageRequest {
   entityData: any;
   style?: ImageStyle;
   customPromptAdditions?: string;
+  // Quality control options
+  enableQualityCheck?: boolean;
+  qualityCheckOptions?: Partial<QualityCheckOptions>;
+  qualityControlOptions?: GenerateWithQCOptions;
 }
 
 export type ImageStyle =
@@ -53,11 +65,15 @@ export class ImageGenerationService {
   private client: OpenAI;
   private cache: Map<string, GeneratedImage[]> = new Map();
   private defaultModel: 'dall-e-2' | 'dall-e-3' = 'dall-e-3';
+  private promptBuilder: PromptBuilder;
+  private qualityChecker: ImageQualityChecker;
 
   constructor(apiKey?: string) {
     this.client = new OpenAI({
       apiKey: apiKey || process.env.OPENAI_API_KEY,
     });
+    this.promptBuilder = new PromptBuilder();
+    this.qualityChecker = new ImageQualityChecker(apiKey);
   }
 
   /**
@@ -135,12 +151,15 @@ export class ImageGenerationService {
   async generateEntityImage(
     request: EntityImageRequest
   ): Promise<ImageGenerationResult> {
-    const prompt = this.buildEntityPrompt(
-      request.entityType,
-      request.entityData,
-      request.style,
-      request.customPromptAdditions
-    );
+    // Use PromptBuilder for better prompts
+    const prompt = this.promptBuilder.build({
+      model: 'dall-e-3' as ImageModel,
+      entityType: request.entityType,
+      entityData: request.entityData,
+      style: request.style,
+      customAdditions: request.customPromptAdditions,
+      avoidTextArtifacts: true,
+    });
 
     return this.generateImage({
       prompt,
@@ -374,13 +393,89 @@ export class ImageGenerationService {
   }
 
   /**
+   * Generate image with quality control
+   */
+  async generateEntityImageWithQC(
+    request: EntityImageRequest
+  ): Promise<{
+    result: ImageGenerationResult;
+    qualityCheck: QualityCheckResult;
+    attempts: number;
+  }> {
+    const generateFn = async () => {
+      const result = await this.generateEntityImage(request);
+      return {
+        url: result.images[0].url,
+        prompt: result.prompt,
+      };
+    };
+
+    const checkOptions: QualityCheckOptions = {
+      entityType: request.entityType,
+      expectedContent: request.entityData.description || request.entityData.name || 'game content',
+      strictMode: request.qualityCheckOptions?.strictMode ?? false,
+      checkForText: request.qualityCheckOptions?.checkForText ?? true,
+    };
+
+    const qcOptions: GenerateWithQCOptions = {
+      maxRetries: request.qualityControlOptions?.maxRetries ?? 3,
+      autoApprove: request.qualityControlOptions?.autoApprove ?? false,
+      onQualityCheck: request.qualityControlOptions?.onQualityCheck,
+    };
+
+    const { url, prompt, qualityCheck, attempts } = await generateWithQualityControl(
+      generateFn,
+      checkOptions,
+      qcOptions
+    );
+
+    // Get the full result
+    const result = await this.generateImage({
+      prompt,
+      model: 'dall-e-3',
+      size: this.getSizeForEntityType(request.entityType),
+      quality: 'hd',
+      style: 'vivid',
+    });
+
+    return {
+      result: {
+        images: [{ url }],
+        prompt,
+        model: 'dall-e-3',
+      },
+      qualityCheck,
+      attempts,
+    };
+  }
+
+  /**
    * Generate and save image for entity
    */
   async generateAndSave(
     request: EntityImageRequest,
     outputDir: string = './output/images'
-  ): Promise<{ filepath: string; url: string; prompt: string }> {
-    const result = await this.generateEntityImage(request);
+  ): Promise<{
+    filepath: string;
+    url: string;
+    prompt: string;
+    qualityCheck?: QualityCheckResult;
+    attempts?: number;
+  }> {
+    let result: ImageGenerationResult;
+    let qualityCheck: QualityCheckResult | undefined;
+    let attempts: number | undefined;
+
+    // Use quality control if enabled
+    if (request.enableQualityCheck) {
+      const qcResult = await this.generateEntityImageWithQC(request);
+      result = qcResult.result;
+      qualityCheck = qcResult.qualityCheck;
+      attempts = qcResult.attempts;
+    } else {
+      result = await this.generateEntityImage(request);
+    }
+
     const image = result.images[0];
 
     const fs = await import('fs/promises');
@@ -399,6 +494,8 @@ export class ImageGenerationService {
       filepath,
       url: image.url,
       prompt: result.prompt,
+      qualityCheck,
+      attempts,
     };
   }
 
@@ -447,6 +544,30 @@ export class ImageGenerationService {
       size: this.cache.size,
       prompts: Array.from(this.cache.keys()),
     };
+  }
+
+  /**
+   * Quick quality check on an existing image URL
+   */
+  async checkImageQuality(
+    imageUrl: string,
+    entityType: string,
+    expectedContent: string,
+    options?: Partial<QualityCheckOptions>
+  ): Promise<QualityCheckResult> {
+    return this.qualityChecker.checkImage(imageUrl, {
+      entityType,
+      expectedContent,
+      strictMode: options?.strictMode ?? false,
+      checkForText: options?.checkForText ?? true,
+    });
+  }
+
+  /**
+   * Format quality check result for display
+   */
+  formatQualityResult(result: QualityCheckResult): string {
+    return this.qualityChecker.formatResult(result);
   }
 }
 
