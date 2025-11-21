@@ -18,6 +18,10 @@ export * from './core/SpatialSystem.js';
 // Connector exports
 export * from './connectors/RelationshipDefinitions.js';
 
+// Utilities
+export * from './utils/IconifyService.js';
+
 // Example schemas (optional)
 export * as MMORPGSchemas from './schemas/examples/mmorpg-schemas.js';
 export * as EnhancedMMORPGSchemas from './schemas/examples/enhanced-mmorpg-schemas.js';
+export * as EventSchemas from './schemas/examples/events-and-random-schemas.js';
