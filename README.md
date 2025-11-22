@@ -14,6 +14,7 @@
 - 📈 **XP Budgeting** - Ensures players reach max level through available content
 - 🎯 **Spatial System** - 3D collision detection and procedural placement
 - 🖼️ **Image Generation** - DALL-E integration with AI-powered quality control
+- 🎙️ **Voice Generation** - ElevenLabs TTS integration for NPC dialogue with voice cloning support
 - 🦀 **Bevy/Rust Export** - RON format for Bevy game engine
 - 🌐 **REST API** - FastAPI server with local storage
 - 📊 **Visualization** - Interactive knowledge graph visualization
@@ -54,6 +55,40 @@ gamedatagen generate npcs --zone "Shadowmoon Forest" --count 5 --images --qualit
 # Generate items for specific level range
 gamedatagen generate items --level-range "50-60" --count 20
 ```
+
+### Voice Generation
+
+Generate voices for NPC dialogue using ElevenLabs TTS:
+
+```bash
+# List available voices from ElevenLabs
+gamedatagen list-voices
+
+# Generate voices for all NPCs without audio (must have voice_id assigned)
+gamedatagen generate-voices
+
+# Generate voices for NPCs in specific zone
+gamedatagen generate-voices --entity-type npc --zone "Shadowmoon Forest"
+
+# Assign a default voice_id to NPCs that don't have one
+gamedatagen generate-voices --voice-id "21m00Tcm4TlvDq8ikWAM"
+
+# Regenerate all dialogue for a specific NPC
+gamedatagen regenerate-voice npc npc_elder --all
+
+# Regenerate just one dialogue line
+gamedatagen regenerate-voice npc npc_elder --dialogue-index 0
+
+# Regenerate voices for all NPCs in a quest
+gamedatagen regenerate-voices-for-quest quest_001
+```
+
+**Workflow:**
+1. Upload voice samples to ElevenLabs to create cloned voices
+2. Assign `voice_id` to NPCs (manually edit JSON or via API)
+3. Generate voices using the commands above
+4. Audio files saved to `assets/audio/dialogue/`
+5. Perfect for dynamic/procedural dialogue that can't be pre-recorded!
 
 ### Export for Bevy (Rust)
 
@@ -158,6 +193,7 @@ See [full documentation](https://github.com/ZachHandley/GameDataGen/docs) for:
 - Custom schema creation
 - Knowledge graph usage
 - Image generation guide
+- Voice generation guide
 - Bevy integration examples
 
 ## 🐳 Docker

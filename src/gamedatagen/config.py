@@ -20,6 +20,7 @@ class ProjectConfig(BaseModel):
     # API Keys
     openai_api_key: Optional[str] = None
     anthropic_api_key: Optional[str] = None
+    elevenlabs_api_key: Optional[str] = None
 
     # Generation settings
     default_model: str = "gpt-4o-mini"
@@ -31,9 +32,17 @@ class ProjectConfig(BaseModel):
     image_quality: str = "hd"
     enable_quality_check: bool = True
 
+    # Voice generation
+    voice_model: str = "eleven_multilingual_v2"
+    voice_stability: float = 0.5
+    voice_similarity_boost: float = 0.75
+    voice_style: float = 0.0
+    voice_use_speaker_boost: bool = True
+
     # Storage
     content_dir: Path = Field(default_factory=lambda: Path("assets/game_content"))
     images_dir: Path = Field(default_factory=lambda: Path("assets/images"))
+    audio_dir: Path = Field(default_factory=lambda: Path("assets/audio"))
     exports_dir: Path = Field(default_factory=lambda: Path("exports"))
 
     class Config:
@@ -66,6 +75,8 @@ def load_config(project_root: Optional[Path] = None) -> ProjectConfig:
         data["content_dir"] = project_root / data["content_dir"]
     if "images_dir" in data:
         data["images_dir"] = project_root / data["images_dir"]
+    if "audio_dir" in data:
+        data["audio_dir"] = project_root / data["audio_dir"]
     if "exports_dir" in data:
         data["exports_dir"] = project_root / data["exports_dir"]
 
@@ -82,6 +93,7 @@ def save_config(config: ProjectConfig) -> None:
     data["project_root"] = str(data["project_root"])
     data["content_dir"] = str(Path(data["content_dir"]).relative_to(config.project_root))
     data["images_dir"] = str(Path(data["images_dir"]).relative_to(config.project_root))
+    data["audio_dir"] = str(Path(data["audio_dir"]).relative_to(config.project_root))
     data["exports_dir"] = str(Path(data["exports_dir"]).relative_to(config.project_root))
 
     with open(config_file, "w") as f:
@@ -117,6 +129,9 @@ def init_project(
         "assets/images/characters",
         "assets/images/enemies",
         "assets/images/environments",
+        "assets/audio/dialogue",
+        "assets/audio/npcs",
+        "assets/audio/quests",
         "exports/unity",
         "exports/unreal",
         "exports/godot",
@@ -133,6 +148,7 @@ def init_project(
         template=template,
         content_dir=project_path / "assets/game_content",
         images_dir=project_path / "assets/images",
+        audio_dir=project_path / "assets/audio",
         exports_dir=project_path / "exports",
     )
     save_config(config)
@@ -298,6 +314,24 @@ def _create_example_schemas(project_path: Path, template: str) -> None:
                 "personality": {"type": "string"},
                 "role": {"type": "string", "enum": ["merchant", "quest_giver", "trainer", "guard"]},
                 "dialogue": {"type": "array", "items": {"type": "string"}},
+                "voice_id": {"type": "string"},
+                "voice_metadata": {
+                    "type": "object",
+                    "properties": {
+                        "audio_files": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "dialogue_index": {"type": "integer"},
+                                    "filepath": {"type": "string"},
+                                    "generated_at": {"type": "string"}
+                                }
+                            }
+                        },
+                        "last_generated": {"type": "string"}
+                    }
+                },
                 "location": {
                     "type": "object",
                     "properties": {
