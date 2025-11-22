@@ -70,16 +70,36 @@ class VoiceManagementView:
             [
                 ft.Text("Voice Management", size=32, weight=ft.FontWeight.BOLD),
                 ft.Divider(),
-                ft.Row(
-                    [
-                        await self.build_npcs_panel(),
-                        ft.VerticalDivider(width=1),
-                        await self.build_voice_assignment_panel(),
+                ft.Tabs(
+                    selected_index=0,
+                    animation_duration=300,
+                    tabs=[
+                        ft.Tab(
+                            text="NPC Voices",
+                            icon=ft.icons.PERSON,
+                            content=await self.build_npc_voices_tab()
+                        ),
+                        ft.Tab(
+                            text="Manage Voices",
+                            icon=ft.icons.LIBRARY_MUSIC,
+                            content=await self.build_manage_voices_tab()
+                        ),
                     ],
                     expand=True,
                 ),
             ],
             scroll=ft.ScrollMode.AUTO,
+            expand=True,
+        )
+
+    async def build_npc_voices_tab(self) -> ft.Row:
+        """Build NPC voices assignment tab"""
+        return ft.Row(
+            [
+                await self.build_npcs_panel(),
+                ft.VerticalDivider(width=1),
+                await self.build_voice_assignment_panel(),
+            ],
             expand=True,
         )
 
@@ -428,3 +448,128 @@ class VoiceManagementView:
             self.status_text.value = f"Error: {str(error)}"
             self.status_text.color = ft.colors.ERROR
             await self.page.update_async()
+
+    async def build_manage_voices_tab(self) -> ft.Column:
+        """Build manage voices tab for creating and viewing ElevenLabs voices"""
+        # Load available voices
+        await self.load_available_voices()
+
+        voices_list = ft.Column([], spacing=10, scroll=ft.ScrollMode.AUTO)
+
+        for voice in self.available_voices:
+            voice_card = ft.Card(
+                content=ft.Container(
+                    content=ft.Column([
+                        ft.ListTile(
+                            leading=ft.Icon(ft.icons.RECORD_VOICE_OVER, color=ft.colors.BLUE_400),
+                            title=ft.Text(voice.get("name", "Unknown"), weight=ft.FontWeight.BOLD),
+                            subtitle=ft.Text(f"ID: {voice.get('voice_id', '')[:30]}..."),
+                        ),
+                        ft.Container(
+                            content=ft.Row([
+                                ft.Chip(
+                                    label=ft.Text(f"Category: {voice.get('category', 'N/A')}"),
+                                    disabled=True,
+                                ),
+                                ft.Chip(
+                                    label=ft.Text(f"Labels: {', '.join(voice.get('labels', {}).values()) or 'None'}"),
+                                    disabled=True,
+                                ),
+                            ], wrap=True),
+                            padding=ft.padding.only(left=16, right=16, bottom=10),
+                        ),
+                    ]),
+                    padding=5,
+                ),
+            )
+            voices_list.controls.append(voice_card)
+
+        create_voice_section = ft.Container(
+            content=ft.Column([
+                ft.Text("Create New Voice Clone", size=20, weight=ft.FontWeight.BOLD),
+                ft.Text(
+                    "Upload audio samples of a voice actor to create a new voice clone in ElevenLabs.",
+                    size=12,
+                    color=ft.colors.GREY_400,
+                ),
+                ft.Divider(),
+                ft.TextField(
+                    label="Voice Name",
+                    hint_text="e.g., John the Merchant",
+                    width=400,
+                ),
+                ft.TextField(
+                    label="Description (optional)",
+                    hint_text="e.g., Deep male voice with British accent",
+                    multiline=True,
+                    min_lines=2,
+                    width=400,
+                ),
+                ft.FilePicker(),
+                ft.ElevatedButton(
+                    "Select Audio Files",
+                    icon=ft.icons.UPLOAD_FILE,
+                    on_click=self.on_select_audio_files,
+                ),
+                ft.Text("", size=12, color=ft.colors.GREY_400),
+                ft.ElevatedButton(
+                    "Create Voice Clone",
+                    icon=ft.icons.ADD_CIRCLE,
+                    on_click=self.on_create_voice_clone,
+                    disabled=True,
+                ),
+                ft.Container(
+                    content=ft.Text(
+                        "⚠️ Note: Voice cloning requires audio samples (recommended: 1-3 minutes of clear speech).\n"
+                        "This feature creates a voice in your ElevenLabs account and requires API credits.",
+                        size=11,
+                        color=ft.colors.AMBER_400,
+                        italic=True,
+                    ),
+                    padding=10,
+                    bgcolor=ft.colors.AMBER_900,
+                    border_radius=8,
+                ),
+            ], spacing=15),
+            padding=20,
+            bgcolor=ft.colors.SURFACE_VARIANT,
+            border_radius=10,
+        )
+
+        return ft.Column([
+            ft.Row([
+                ft.Column([
+                    ft.Text("Available Voices", size=20, weight=ft.FontWeight.BOLD),
+                    ft.Text(f"{len(self.available_voices)} voices available", size=12, color=ft.colors.GREY_400),
+                    ft.Container(height=10),
+                    voices_list,
+                ], expand=True, scroll=ft.ScrollMode.AUTO),
+                ft.VerticalDivider(width=1),
+                ft.Column([
+                    create_voice_section,
+                ], expand=True),
+            ], expand=True),
+        ], expand=True, spacing=10)
+
+    async def on_select_audio_files(self, e: ft.ControlEvent) -> None:
+        """Handle audio file selection for voice cloning"""
+        await self.page.show_snack_bar_async(
+            ft.SnackBar(
+                content=ft.Text(
+                    "Audio file selection not yet implemented. "
+                    "You can add voices directly through the ElevenLabs web interface."
+                )
+            )
+        )
+
+    async def on_create_voice_clone(self, e: ft.ControlEvent) -> None:
+        """Handle creating a new voice clone"""
+        await self.page.show_snack_bar_async(
+            ft.SnackBar(
+                content=ft.Text(
+                    "Voice cloning not yet implemented. "
+                    "Please use the ElevenLabs web interface to create voice clones, "
+                    "then they will appear here automatically."
+                )
+            )
+        )
