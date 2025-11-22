@@ -688,6 +688,27 @@ async def _list_voices() -> None:
 
 
 @main.command()
+def desktop() -> None:
+    """
+    Launch GameDataGen desktop application
+
+    Opens a GUI interface for managing game content, voices, and settings.
+    Must be run from a GameDataGen project directory.
+
+    Example:
+        gamedatagen desktop
+    """
+    from gamedatagen.desktop import run_desktop_app
+
+    console.print(Panel.fit(
+        "[bold cyan]Launching GameDataGen Desktop[/]",
+        border_style="cyan"
+    ))
+
+    run_desktop_app()
+
+
+@main.command()
 def status() -> None:
     """
     Show project status and statistics

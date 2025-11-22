@@ -15,6 +15,7 @@
 - 🎯 **Spatial System** - 3D collision detection and procedural placement
 - 🖼️ **Image Generation** - DALL-E integration with AI-powered quality control
 - 🎙️ **Voice Generation** - ElevenLabs TTS integration for NPC dialogue with voice cloning support
+- 🖥️ **Desktop GUI** - Modern Flet-based desktop application for visual content management
 - 🦀 **Bevy/Rust Export** - RON format for Bevy game engine
 - 🌐 **REST API** - FastAPI server with local storage
 - 📊 **Visualization** - Interactive knowledge graph visualization
@@ -106,6 +107,23 @@ gamedatagen export bevy-json
 gamedatagen visualize
 # Opens knowledge_graph.html with interactive visualization
 ```
+
+### Desktop Application
+
+Launch the visual desktop interface:
+
+```bash
+gamedatagen desktop
+```
+
+Features:
+- 🎨 Visual content generation with forms and progress indicators
+- 🎙️ Voice management UI for assigning and generating NPC voices
+- 📊 Project statistics dashboard with charts
+- ⚙️ Settings panel for API keys and configuration
+- 🚀 Built with [Flet](https://flet.dev) - runs natively on Windows, macOS, Linux
+
+See [Desktop App Documentation](docs/flet/README.md) for details.
 
 ### Start API Server
 
