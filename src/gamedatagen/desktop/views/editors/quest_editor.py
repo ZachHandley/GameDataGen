@@ -1,8 +1,11 @@
 """Quest Editor"""
 from typing import Any, Callable
+
 import flet as ft
+
 from gamedatagen.config import ProjectConfig
 from gamedatagen.core.game_data_gen import GameDataGen
+
 
 class QuestEditor:
     def __init__(self, page: ft.Page, config: ProjectConfig, gen: GameDataGen,

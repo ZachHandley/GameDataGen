@@ -9,10 +9,10 @@ import flet as ft
 from gamedatagen.config import ProjectConfig
 from gamedatagen.core.game_data_gen import GameDataGen
 from gamedatagen.desktop.components.entity_browser import EntityBrowser
+from gamedatagen.desktop.views.editors.enemy_editor import EnemyEditor
+from gamedatagen.desktop.views.editors.item_editor import ItemEditor
 from gamedatagen.desktop.views.editors.npc_editor import NPCEditor
 from gamedatagen.desktop.views.editors.quest_editor import QuestEditor
-from gamedatagen.desktop.views.editors.item_editor import ItemEditor
-from gamedatagen.desktop.views.editors.enemy_editor import EnemyEditor
 from gamedatagen.desktop.views.editors.zone_editor import ZoneEditor
 
 

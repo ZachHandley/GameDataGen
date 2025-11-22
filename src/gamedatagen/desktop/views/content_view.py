@@ -2,8 +2,6 @@
 Content Generation View
 """
 
-import asyncio
-from typing import Any
 
 import flet as ft
 

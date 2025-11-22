@@ -3,9 +3,7 @@ GameDataGen Desktop Application
 Built with Flet for cross-platform desktop support
 """
 
-import asyncio
 from pathlib import Path
-from typing import Any
 
 import flet as ft
 
@@ -13,9 +11,9 @@ from gamedatagen.config import load_config
 from gamedatagen.core.game_data_gen import GameDataGen
 from gamedatagen.desktop.views.browse_view import BrowseView
 from gamedatagen.desktop.views.content_view import ContentGenerationView
-from gamedatagen.desktop.views.voice_view import VoiceManagementView
-from gamedatagen.desktop.views.stats_view import StatsView
 from gamedatagen.desktop.views.settings_view import SettingsView
+from gamedatagen.desktop.views.stats_view import StatsView
+from gamedatagen.desktop.views.voice_view import VoiceManagementView
 
 
 class GameDataGenApp:

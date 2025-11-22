@@ -2,7 +2,6 @@
 NPC Editor with Dialogue, Voice, and Image Support
 """
 
-from pathlib import Path
 from typing import Any, Callable
 
 import flet as ft
@@ -290,7 +289,6 @@ class NPCEditor:
     def build_image_preview(self) -> ft.Column:
         """Build image preview section"""
         # Check if NPC has an associated image
-        npc_id = self.npc.get("id", "")
         npc_name = self.npc.get("name", "")
 
         # Look for image file

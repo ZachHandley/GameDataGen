@@ -1,9 +1,12 @@
 """Enemy Editor with Loot Tables"""
 from typing import Any, Callable
+
 import flet as ft
+
 from gamedatagen.config import ProjectConfig
 from gamedatagen.core.game_data_gen import GameDataGen
 from gamedatagen.desktop.components.loot_table_editor import LootTableEditor
+
 
 class EnemyEditor:
     def __init__(self, page: ft.Page, config: ProjectConfig, gen: GameDataGen,
@@ -17,7 +20,7 @@ class EnemyEditor:
     async def build(self) -> ft.Column:
         loot_table = self.enemy.get("loot_table", [])
         self.loot_editor = LootTableEditor(self.page, loot_table)
-        
+
         return ft.Column([
             ft.Text(f"Editing: {self.enemy.get('name', 'Enemy')}", size=24, weight=ft.FontWeight.BOLD),
             ft.Tabs(tabs=[

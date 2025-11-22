@@ -2,7 +2,6 @@
 Voice Management View
 """
 
-import asyncio
 from typing import Any
 
 import flet as ft
@@ -92,7 +91,6 @@ class VoiceManagementView:
         self.npcs_list_view = ft.ListView(spacing=5, padding=10, expand=True)
 
         for npc in self.npcs_list:
-            npc_id = npc.get("id", "")
             npc_name = npc.get("name", "Unknown")
             voice_id = npc.get("voice_id")
             has_audio = bool(npc.get("voice_metadata", {}).get("audio_files"))
