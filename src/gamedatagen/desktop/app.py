@@ -11,6 +11,7 @@ import flet as ft
 
 from gamedatagen.config import load_config
 from gamedatagen.core.game_data_gen import GameDataGen
+from gamedatagen.desktop.views.browse_view import BrowseView
 from gamedatagen.desktop.views.content_view import ContentGenerationView
 from gamedatagen.desktop.views.voice_view import VoiceManagementView
 from gamedatagen.desktop.views.stats_view import StatsView
@@ -36,6 +37,7 @@ class GameDataGenApp:
         self.current_view = "content"
 
         # Views
+        self.browse_view: BrowseView | None = None
         self.content_view: ContentGenerationView | None = None
         self.voice_view: VoiceManagementView | None = None
         self.stats_view: StatsView | None = None
@@ -54,6 +56,9 @@ class GameDataGenApp:
             self.game_data_gen = GameDataGen(self.config)
 
             # Initialize views
+            self.browse_view = BrowseView(
+                self.page, self.config, self.game_data_gen
+            )
             self.content_view = ContentGenerationView(
                 self.page, self.config, self.game_data_gen
             )
@@ -97,6 +102,11 @@ class GameDataGenApp:
             group_alignment=-0.9,
             destinations=[
                 ft.NavigationRailDestination(
+                    icon=ft.icons.EDIT_NOTE_OUTLINED,
+                    selected_icon=ft.icons.EDIT_NOTE,
+                    label="Browse",
+                ),
+                ft.NavigationRailDestination(
                     icon=ft.icons.AUTO_AWESOME,
                     selected_icon=ft.icons.AUTO_AWESOME_OUTLINED,
                     label="Generate",
@@ -126,15 +136,18 @@ class GameDataGenApp:
         index = e.control.selected_index
 
         if index == 0:
+            self.current_view = "browse"
+            self.view_container.content = await self.browse_view.build()
+        elif index == 1:
             self.current_view = "content"
             self.view_container.content = await self.content_view.build()
-        elif index == 1:
+        elif index == 2:
             self.current_view = "voice"
             self.view_container.content = await self.voice_view.build()
-        elif index == 2:
+        elif index == 3:
             self.current_view = "stats"
             self.view_container.content = await self.stats_view.build()
-        elif index == 3:
+        elif index == 4:
             self.current_view = "settings"
             self.view_container.content = await self.settings_view.build()
 
@@ -153,7 +166,7 @@ class GameDataGenApp:
 
         # Build view container
         self.view_container = ft.Container(
-            content=await self.content_view.build(),
+            content=await self.browse_view.build(),
             expand=True,
             padding=20,
         )
