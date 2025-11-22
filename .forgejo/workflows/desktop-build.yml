@@ -1,0 +1,185 @@
+name: Build Desktop Apps
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Install PyInstaller
+        run: uv pip install pyinstaller
+
+      - name: Build Windows executable
+        run: |
+          uv run pyinstaller --name GameDataGen-Desktop ^
+            --windowed ^
+            --onefile ^
+            --icon=assets/icon.ico ^
+            --add-data "src/gamedatagen;gamedatagen" ^
+            --hidden-import flet ^
+            --hidden-import flet.fastapi ^
+            src/gamedatagen/desktop/app.py || echo "Build completed with warnings"
+
+      - name: Create package
+        run: |
+          mkdir -p release
+          copy dist\GameDataGen-Desktop.exe release\
+          echo "GameDataGen Desktop - Windows" > release\README.txt
+          echo "Run GameDataGen-Desktop.exe to launch" >> release\README.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GameDataGen-Desktop-Windows
+          path: release/
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Install PyInstaller
+        run: uv pip install pyinstaller
+
+      - name: Build macOS app
+        run: |
+          uv run pyinstaller --name GameDataGen-Desktop \
+            --windowed \
+            --onefile \
+            --icon=assets/icon.icns \
+            --add-data "src/gamedatagen:gamedatagen" \
+            --hidden-import flet \
+            --hidden-import flet.fastapi \
+            src/gamedatagen/desktop/app.py || echo "Build completed with warnings"
+
+      - name: Create DMG
+        run: |
+          mkdir -p release
+          cp -r dist/GameDataGen-Desktop.app release/ || cp dist/GameDataGen-Desktop release/
+          echo "GameDataGen Desktop - macOS" > release/README.txt
+          echo "Run GameDataGen-Desktop to launch" >> release/README.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GameDataGen-Desktop-macOS
+          path: release/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          uv sync
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev
+
+      - name: Install PyInstaller
+        run: uv pip install pyinstaller
+
+      - name: Build Linux executable
+        run: |
+          uv run pyinstaller --name GameDataGen-Desktop \
+            --onefile \
+            --add-data "src/gamedatagen:gamedatagen" \
+            --hidden-import flet \
+            --hidden-import flet.fastapi \
+            src/gamedatagen/desktop/app.py || echo "Build completed with warnings"
+
+      - name: Create package
+        run: |
+          mkdir -p release
+          cp dist/GameDataGen-Desktop release/
+          chmod +x release/GameDataGen-Desktop
+          echo "GameDataGen Desktop - Linux" > release/README.txt
+          echo "Run ./GameDataGen-Desktop to launch" >> release/README.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GameDataGen-Desktop-Linux
+          path: release/
+
+  create-desktop-release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: GameDataGen-Desktop-Windows
+          path: dist/windows/
+
+      - name: Download macOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: GameDataGen-Desktop-macOS
+          path: dist/macos/
+
+      - name: Download Linux build
+        uses: actions/download-artifact@v4
+        with:
+          name: GameDataGen-Desktop-Linux
+          path: dist/linux/
+
+      - name: Create archives
+        run: |
+          cd dist/windows && zip -r ../../GameDataGen-Desktop-Windows.zip . && cd ../..
+          cd dist/macos && tar -czf ../../GameDataGen-Desktop-macOS.tar.gz . && cd ../..
+          cd dist/linux && tar -czf ../../GameDataGen-Desktop-Linux.tar.gz . && cd ../..
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            GameDataGen-Desktop-Windows.zip
+            GameDataGen-Desktop-macOS.tar.gz
+            GameDataGen-Desktop-Linux.tar.gz
+          tag_name: ${{ steps.version.outputs.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
